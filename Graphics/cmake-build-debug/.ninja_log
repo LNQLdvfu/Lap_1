@@ -1,0 +1,4 @@
+# ninja log v5
+1	45	1681217334733291213	build.ninja	dc51e7d121856d68
+2	83	1681137021261857790	CMakeFiles/Graphics.dir/main.cpp.o	9b907488c76e76ba
+2	89	1681217336962843181	CMakeFiles/Graphics.dir/main.cpp.o	c62b36a249266a95
