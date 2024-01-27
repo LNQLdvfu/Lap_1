@@ -1,3 +1,0 @@
-/Users/lengocquoclich/Desktop/xcode/Lap2/cmake-build-debug/CMakeFiles/Lap2.dir
-/Users/lengocquoclich/Desktop/xcode/Lap2/cmake-build-debug/CMakeFiles/edit_cache.dir
-/Users/lengocquoclich/Desktop/xcode/Lap2/cmake-build-debug/CMakeFiles/rebuild_cache.dir

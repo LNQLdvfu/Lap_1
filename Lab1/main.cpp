@@ -1,146 +1,184 @@
-#include<iostream>
-#include<vector>
-#include<cstdlib>
-#include<cmath>
-#include<time.h>
+#include <iostream>
+#include <cmath>
+#include <vector>
 
 using namespace std;
 
-void randomize_x(float a, float b, vector<float>& c);
-void caculate_y(vector<float>& m,vector<float>& d);
-float caculate_Ln(vector<float> &a, vector<float> &b, float xp);
-float fx(float d);
-float caculate_delta(float a, float b) {return abs(a - b);}
-float caculate_thelta(float a, float b) {return (abs(a - b) / abs(b)) * 100;}
-float remainder(const int n,const float a, const float b,const float x);
-float factorial(int n);
+void gaussianElimination(vector<vector<double>>& A, int n, vector<double>& x) {
+    vector<int> NROW(n); // Array to keep track of row interchanges
 
-int main(){
-
-    const float a{0.1},b{0.6};
-
-
-    float xp{};
-    cout<<"Enput the value needing to caculate: ";
-    cin>>xp;
-    vector<float>container;
-    bool u{true};
-    vector<vector<float>>pp;
-    vector<float>delta;
-    vector<float>thelta;
-    vector<float>remainder_1;
-    while (u){
-        cout<<"Enter n: ";
-        int n;
-        cin>>n;
-        container.push_back(n);
-        char ss;
-        cout<<"Do you want to extra n(y/n): ";
-        cin>>ss;
-        if(ss == 'y')
-            u = true;
-        else
-            u = false;
-
-        vector<float>X_i(n);
-        vector<float>Y_i(n);
-
-        randomize_x(a,b,X_i);
-        caculate_y(Y_i,X_i);
-        vector<float>overall;
-        overall.push_back(caculate_Ln(X_i,Y_i,xp));
-        float m = overall.front();
-        overall.push_back(caculate_thelta(m,fx(xp)));
-        thelta.push_back(caculate_thelta(m,fx(xp)));
-        overall.push_back(caculate_delta(m,fx(xp)));
-        delta.push_back(caculate_delta(m,fx(xp)));
-        overall.push_back(remainder(n,a,b,xp));
-        remainder_1.push_back(remainder(n,a,b,xp));
-        pp.push_back(overall);
-    }
-
-
-
-    for(int i{}; i < pp.size(); ++i){
-        cout<<"n = "<<container[i]<<"| ";
-        for(int j{}; j < pp[i].size(); ++j){
-            cout<<pp[i][j]<< " ";
+    // Step 1: Initialize NROW and check for unique solution
+    for (int i = 0; i < n; ++i) {
+        double maxVal = 0.0;
+        for (int j = 0; j < n; ++j) {
+            maxVal = max(maxVal, fabs(A[i][j]));
         }
-        cout<<endl;
-    }
-    cout<<"thelta"<<endl;
-    for(float x: thelta){
-        cout<<x<<endl;
-    }
 
-    cout<<"delta"<<endl;
-    for(float x: delta){
-        cout<<x<<endl;
+        if (maxVal == 0) {
+            cout << "No unique solution exists." << endl;
+            return;
+        }
+
+        NROW[i] = i;
     }
 
-    cout<<"remainder"<<endl;
-    for(float x: remainder_1){
-        cout<<x<<endl;
-    }
-
-
-}
-
-void randomize_x(float a, float b, vector<float>& c){
-    srand(time(0));
-    for(int i{}; i < c.size(); i++)
-    {
-        c[i] = a + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (b-a)));
-    }
-}
-
-
-void caculate_y(vector<float>& m,vector<float>& d){
-    for(int i{}; i < m.size(); i++)
-    {
-        m[i] = pow(d[i],2) - cos(M_PI * d[i]);
-    }
-}
-
-float fx(float d){
-    return  pow(d,2) - cos(M_PI * d);
-}
-
-float caculate_Ln(vector<float> &a, vector<float> &b, float xp){
-    float Ln{0};
-    if(a.size() == b.size())
-    {
-        for(int i{}; i < b.size(); i++)
-        {
-            float Sn{1};
-            for(int j{}; j < a.size(); j++)
-            {
-                if(i != j) {
-                    Sn = Sn * (xp - a[j]) / (a[i] - a[j]);
-                }
+    // Step 2: Gaussian elimination with partial pivoting
+    for (int i = 0; i < n; ++i) {
+        // Step 3-5
+        int p = i;
+        for (int j = i; j < n; ++j) {
+            if (fabs(A[NROW[j]][i] / fabs(A[NROW[j]][i])) > fabs(A[NROW[p]][i] / fabs(A[NROW[p]][i]))) {
+                p = j;
             }
-            Ln = Ln + Sn*b[i];
+        }
+
+        // Step 4
+        if (A[NROW[p]][i] == 0) {
+            cout << "No unique solution exists." << endl;
+            return;
+        }
+
+        // Step 5
+        if (NROW[i] != NROW[p]) {
+            swap(NROW[i], NROW[p]);
+        }
+
+        // Step 6-8
+        for (int j = i + 1; j < n; ++j) {
+            double m = A[NROW[j]][i] / A[NROW[i]][i];
+            for (int k = i; k <= n; ++k) {
+                A[NROW[j]][k] -= m * A[NROW[i]][k];
+            }
         }
     }
-    return Ln;
+
+    // Step 9
+    if (A[NROW[n - 1]][n - 1] == 0) {
+        cout << "No unique solution exists." << endl;
+        return;
+    }
+
+    // Step 10: Back substitution
+    x[n - 1] = A[NROW[n - 1]][n] / A[NROW[n - 1]][n - 1];
+
+    // Step 11
+    for (int i = n - 2; i >= 0; --i) {
+        double sum = A[NROW[i]][n];
+        for (int j = i + 1; j < n; ++j) {
+            sum -= A[NROW[i]][j] * x[j];
+        }
+        x[i] = sum / A[NROW[i]][i];
+    }
 }
 
-float remainder(const int n,const float a,const float b, const float x){
-    float m{};
-    if((n+1) %2 == 0){
-        m = pow(M_PI,n+1) * cos(M_PI * x);
+double infinityNorm(const vector<double>& v) {
+    double maxVal = 0.0;
+    for (double val : v) {
+        maxVal = max(maxVal, fabs(val));
     }
-    else{
-        m = pow(M_PI,n+1)*sin(M_PI * x);
-    }
-    return ((abs(m) / factorial(n + 1)) * pow(( b - a),n+1));
+    return maxVal;
 }
 
-float factorial(int n){
+int main() {
+    int n, N, t;
+    double c,d;
+    double TOL;
 
-    if (n > 0) {
-        return n * factorial(n - 1);
-    } else {
-        return 1;
+    // Input: n, A, b, N, TOL, t
+    cout << "Enter the number of equations and unknowns (n): ";
+    cin >> n;
+
+    vector<vector<double>> A(n, vector<double>(n+1));
+    vector<double> b(n);
+    vector<double> x(n);
+    vector<double> xx(n);
+    vector<double>z(n);
+    vector<double> r(n);
+    vector<double> y(n);
+
+    cout << "Enter the entries of matrix A:" << endl;
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j <= n; ++j) {
+            cin >> A[i][j];
+        }
     }
+
+    cout << "Enter the entries of vector b:" << endl;
+    for (int i = 0; i < n; ++i) {
+        cin >> b[i];
+    }
+
+    cout << "Enter the maximum number of iterations (N): ";
+    cin >> N;
+
+    cout << "Enter the tolerance (TOL): ";
+    cin >> TOL;
+
+    cout << "Enter the number of digits of precision (t): ";
+    cin >> t;
+
+    // Step 0: Gaussian elimination
+    gaussianElimination(A, n, x);
+    for(auto& X:x){
+        cout<<X<< " ";
+    }
+
+    cout<<endl;
+
+    int k = 1;
+    double COND = 0.0;
+
+    while (k <= N) {
+        // Step 3: Calculate r
+        for (int i = 0; i < n; ++i) {
+            r[i] = b[i];
+            for (int j = 0; j < n; ++j) {
+                r[i] -= A[i][j] * x[j];
+            }
+        }
+        for(int i{}; i < n; i++){
+            for(int j{n}; j <= n ; j++ )
+                A[i][j] = r[i];
+        }
+        // Step 4: Solve the linear system Ay = r by Gaussian elimination
+        gaussianElimination(A, n, y);
+
+        // Step 5: Update xx
+        for (int i = 0; i < n; ++i) {
+            xx[i] =x[i] +  y[i];
+        }
+
+        // Step 6: Calculate COND on the first iteration
+        if (k == 1) {
+            COND = (infinityNorm(y) / infinityNorm(xx)) * pow(10, t);
+        }
+        for(int i{};i < n; i++) {
+            z[i] = x[i] -xx[i];
+        }
+        // Step 7: Check convergence
+        if (infinityNorm(z) <= TOL) {
+            cout << "Approximation (xx): ";
+            for (double val : xx) {
+                cout << val << " ";
+            }
+            cout << endl;
+            cout << "COND: " << COND << endl;
+            cout << "The procedure was successful." << endl;
+            return 0; // Stop
+        }
+
+        // Step 8: Increment iteration count
+        ++k;
+
+        // Step 9: Update x for the next iteration
+        for (int i = 0; i < n; ++i) {
+            x[i] = xx[i];
+        }
+    }
+
+    // Step 10: Output if maximum iterations exceeded
+    cout << "Maximum number of iterations exceeded." << endl;
+    cout << "COND: " << COND << endl;
+
+    return 0;
 }
